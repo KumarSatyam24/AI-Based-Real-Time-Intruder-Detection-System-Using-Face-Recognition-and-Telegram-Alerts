@@ -23,8 +23,8 @@ face_detection:
 
 # Telegram Bot Configuration
 telegram:
-  bot_token: "8233449278:AAHBzhJODian99m6SlDsyHl6kIpTD-QmIwQ"  # Your Telegram Bot Token (set via environment variable)
-  chat_id: "6730084353"    # Your Telegram Chat ID (set via environment variable)
+  bot_token: ""  # Set via environment variable TELEGRAM_BOT_TOKEN
+  chat_id: ""    # Set via environment variable TELEGRAM_CHAT_ID
   enable_alerts: true
   alert_cooldown: 30  # Seconds between alerts for same unknown person
 
