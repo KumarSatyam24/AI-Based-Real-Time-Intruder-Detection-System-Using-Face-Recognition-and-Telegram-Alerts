@@ -1,515 +1,185 @@
-# Advanced Intrusion Detection System# Advanced Intrusion Detection System# Intrusion Detection (Motion + Optional YOLO Person Filtering)
+# Advanced Intrusion Detection System
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.8+-blue.svg" alt="Python">
+  <img src="https://img.shields.io/badge/OpenCV-4.5+-green.svg" alt="OpenCV">
+  <img src="https://img.shields.io/badge/YOLOv8-Ready-purple.svg" alt="YOLOv8">
+  <img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License">
+</p>
 
+<p align="center">
+  A comprehensive, real-time intrusion detection system featuring motion detection, person tracking, damage detection (forced entry, window shattering), and automatic incident reporting. Built with OpenCV, YOLO, and modern computer vision techniques.
+</p>
 
-Real-time video analysis system for detecting motion, tracking persons, and identifying structural damage (forced entry, window breaking).
+<!-- 
+<p align="center">
+  <img src="docs/demo.gif" width="80%">
+</p>
+-->
 
+## 🌟 Key Features
 
+- ✅ **Motion Detection**: High-performance background subtraction (KNN) with morphological filtering to detect movement in restricted zones.
+- 👤 **Person Tracking**: Integrates YOLOv8 to specifically identify and track humans, significantly reducing false positives from other movements.
+- 🚪 **Damage Detection**: A multi-heuristic algorithm to detect signs of forced entry, such as window shattering or door impacts, by analyzing frame differences, edge spikes, and fragmentation.
+- 📊 **Concise Incident Reporting**: Automatically generates detailed JSON reports that summarize events into "intrusion periods," reducing log size by over 90% compared to frame-by-frame logging.
+- 🎯 **Interactive ROI Management**: Easy-to-use tool to draw and define specific Regions of Interest (e.g., doors, windows) for targeted monitoring.
+- 🔧 **Real-time Debugging**: Includes a debug tool with interactive trackbars to fine-tune damage detection sensitivity live on a video stream.
+- 📹 **Batch Processing**: Capable of processing multiple video files in a single run, generating individual reports for each.
+- ⚙️ **Highly Configurable**: A central `config.py` file allows for easy tuning of all detection parameters and system settings.
 
-## Features![Python](https://img.shields.io/badge/python-3.8+-blue.svg)This project processes videos in `input_videos/`, highlights motion (and optionally people), and writes enhanced videos to `output_videos/`.
+## 📦 Installation
 
+### Prerequisites
+- Python 3.8 or higher
+- `pip` package manager
 
+### Setup Steps
 
-- **Motion Detection** - Background subtraction with morphological filtering![OpenCV](https://img.shields.io/badge/opencv-4.5+-green.svg)
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/KumarSatyam24/AI-Based-Real-Time-Intruder-Detection-System-Using-Face-Recognition-and-Telegram-Alerts.git
+    cd facial_detection_system
+    ```
 
-- **Person Tracking** - YOLO-based detection with confidence filtering  
+2.  **Create and activate a virtual environment** (recommended):
+    ```bash
+    # For macOS/Linux
+    python3 -m venv .venv
+    source .venv/bin/activate
 
-- **Damage Detection** - Detects forced entry and window shattering![License](https://img.shields.io/badge/license-MIT-blue.svg)It’s implemented as a standalone Python package `intrusion_detection` and a small CLI runner script. No notebook required.
+    # For Windows
+    python -m venv .venv
+    .\.venv\Scripts\activate
+    ```
 
-- **Incident Reports** - Automatic JSON logging with summaries
+3.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+    *The YOLOv8 model (`yolov8n.pt`) will be automatically downloaded on the first run.*
 
-- **ROI Management** - Define custom regions of interest for doors/windows
+## 🚀 Usage / Quick Start
 
-- **Batch Processing** - Process multiple videos automatically
+### 1. Place Videos
+Put your video files (`.mp4`, `.avi`, etc.) into the `input_videos/` directory.
 
-A comprehensive, real-time intrusion detection system featuring **motion detection**, **person tracking**, **damage detection** (forced entry, window shattering), and **automatic incident reporting**. Built with OpenCV, YOLO, and modern computer vision techniques.## Features
-
-## Quick Start
-
-- Background subtraction (KNN/MOG2) + morphology to extract motion
-
-### Installation
-
-## 🌟 Key Features- Optional YOLO (yolov8n.pt) person filtering to reduce false positives
+### 2. Run Detection
+Execute the main script from the root directory.
 
 ```bash
-
-# Install dependencies- Grayscale-friendly with optional CLAHE contrast enhancement
-
-pip install -r requirements.txt
-
-### Core Detection Capabilities- Reliable MP4 writing on macOS via imageio/ffmpeg
-
-# Place videos in input_videos/
-
-cp your_video.mp4 input_videos/- ✅ **Motion Detection** - Background subtraction (KNN/MOG2) with morphological filtering- Batch processing of multiple input videos
-
-```
-
-- 👤 **Person Tracking** - YOLO-based person detection with confidence filtering
-
-### Run Detection
-
-- 🚪 **Damage Detection** - Heuristic detection of forced entry and window shattering## Quick Start
-
-```bash
-
-# Process all videos- 📊 **Incident Reporting** - Automatic JSON logging with concise summaries
-
+# Process all videos in the input folder
 python run_intrusion_detection.py --all
 
-- 🎯 **ROI Management** - Interactive region-of-interest selection for doors/windows1) Create/activate a virtual environment (recommended)
-
-# Process specific video
-
-python run_intrusion_detection.py --select video.mp4- 📹 **Batch Processing** - Process multiple videos with consolidated reports
-
-
-
-# View incident report2) Install dependencies:
-
-python view_incidents.py
-
-```### Advanced Features```bash
-
-
-
-## Configuration- **Grayscale Enhancement** - CLAHE contrast enhancement + gamma correctionpip install -r requirements.txt
-
-
-
-Edit `intrusion_detection/config.py` for thresholds and settings.- **Noise Reduction** - Gaussian pre-filtering and morphological operations```
-
-
-
-### Define ROIs (optional)- **Person-Only Mode** - Track only human motion, ignore other movement
-
-
-
-```bash- **Persistent Highlighting** - Damage events stay visible for configurable duration3) Put videos into `input_videos/`
-
-python select_rois.py input_videos/video.mp4
-
-```- **Real-time Debugging** - Interactive threshold tuning with live feedback
-
-
-
-Click and drag to draw rectangles:- **Cross-Platform** - Reliable video I/O via imageio + ffmpeg4) Run (process all videos):
-
-- Press `D` for door
-
-- Press `W` for window  ```bash
-
-- Press `S` to save
-
-## 📦 Installationpython run_intrusion_detection.py --all
-
-### Tune Thresholds
-
-```
-
-```bash
-
-python debug_damage_detection.py input_videos/video.mp4### Prerequisites
-
-```
-
-- Python 3.8 or higherExamples:
-
-Use trackbars to adjust sensitivity in real-time.
-
-- pip package manager```bash
-
-## Project Structure
-
-# Process specific videos
-
-```
-
-facial_detection_system/### Quick Setuppython run_intrusion_detection.py --select intruder_1.mp4,intruder_3.mp4
-
-├── intrusion_detection/       # Core package
-
-│   ├── config.py              # Settings
-
-│   ├── motion.py              # Motion detection
-
-│   ├── damage.py              # Damage detection1. **Clone the repository**# Limit to the first 300 frames
-
-│   ├── incidents.py           # Logging
-
-│   └── processing.py          # Video pipeline```bashpython run_intrusion_detection.py --all --max-frames 300
-
-├── run_intrusion_detection.py # Main script
-
-├── select_rois.py             # ROI toolgit clone https://github.com/KumarSatyam24/AI-Based-Real-Time-Intruder-Detection-System-Using-Face-Recognition-and-Telegram-Alerts.git
-
-├── debug_damage_detection.py  # Debug tool
-
-├── view_incidents.py          # Report viewercd facial_detection_system# Disable YOLO and run motion-only
-
-├── input_videos/              # Input folder
-
-├── output_videos/             # Enhanced videos```python run_intrusion_detection.py --all --disable-yolo
-
-└── data/
-
-    ├── incidents/             # JSON reports```
-
-    └── rois/                  # ROI configs
-
-```2. **Create virtual environment** (recommended)
-
-
-
-## Output```bashOutputs are saved to `output_videos/` with a timestamp suffix.
-
-
-
-- **Enhanced Videos**: `output_videos/` - Videos with highlighted detectionspython -m venv .venv
-
-- **Incident Reports**: `data/incidents/*.json` - Detailed event logs
-
-## YOLO Model (Optional)
-
-## License
-
-# Activate on macOS/Linux- If `yolov8n.pt` is present in the project root and `Config.ENABLE_PERSON_DETECTION` is True, YOLO will filter motion to likely-human regions.
-
-MIT License - see LICENSE file
-
-source .venv/bin/activate- If the model is unavailable or disabled, the system still runs with motion-only detection.
-
-
-
-# Activate on Windows## Project Structure
-
-.venv\Scripts\activate- `intrusion_detection/`: modular Python package
-
-```  - `config.py`: config, directories, logging, YOLO init
-
-  - `video.py`: OpenCV capture wrapper
-
-3. **Install dependencies**  - `background.py`: background subtractor utilities
-
-```bash  - `motion.py`: motion detector (with person filtering, grayscale handling)
-
-pip install -r requirements.txt  - `alerts.py`: simple alert logger
-
-```  - `processing.py`: video processing using imageio/ffmpeg
-
-  - `system.py`: orchestration for batch runs
-
-4. **Download YOLO model** (optional, for person detection)  - `interactive.py`: helpers for interactive selection (used by notebooks/console if needed)
-
-```bash- `run_intrusion_detection.py`: CLI runner
-
-# The ultralytics package will auto-download yolov8n.pt on first run- `input_videos/`, `output_videos/`: I/O folders
-
-# Or manually download from: https://github.com/ultralytics/assets/releases- `data/`: auxiliary data (optionally used)
-
-```
-
-## Troubleshooting
-
-## 🚀 Quick Start- macOS codec issues: this project uses imageio/ffmpeg, which is cross-platform and reliable.
-
-- If you see no outputs: check `motion_detection_system.log` and ensure videos exist in `input_videos/`.
-
-### Basic Usage- Performance: adjust `Config.FRAME_WIDTH/HEIGHT` to control processing cost.
-
-
-
-1. **Place videos in `input_videos/` folder**## License
-
-```bashThis repository contains user-provided data and code. Ensure you have rights to any media you process. The code avoids face recognition and focuses on motion/person filtering.
-
-cp your_video.mp4 input_videos/
-```
-
-2. **Run detection on all videos**
-```bash
-python run_intrusion_detection.py --all
-```
-
-3. **View results**
-- Enhanced videos: `output_videos/`
-- Incident reports: `data/incidents/`
-
-### Advanced Usage
-
-```bash
-# Process specific videos
+# Process one or more specific videos
 python run_intrusion_detection.py --select intruder_1.mp4,intruder_2.mp4
 
-# Limit processing to first 300 frames (for testing)
-python run_intrusion_detection.py --all --max-frames 300
-
-# Run motion-only (disable YOLO person detection)
-python run_intrusion_detection.py --all --disable-yolo
-
-# Interactive video selection
+# Run with an interactive file picker
 python run_intrusion_detection.py --select
 ```
 
-## 🔧 Configuration
+### 3. View Results
+-   **Annotated Videos**: Find the processed videos with bounding boxes in the `output_videos/` folder.
+-   **Incident Reports**: Detailed JSON reports are saved in `data/incidents/`.
 
-### Setting up ROIs (Regions of Interest)
+## 🔧 Configuration & Tools
 
-For damage detection, define door/window areas:
+### Define Regions of Interest (ROIs)
+For targeted damage detection, you must define ROIs for doors and windows.
 
 ```bash
 python select_rois.py input_videos/your_video.mp4
 ```
+**ROI Selector Controls:**
+-   **Click and Drag**: Draw a rectangle.
+-   **`d` key**: Mark the last drawn rectangle as a "door".
+-   **`w` key**: Mark it as a "window".
+-   **`u` key**: Undo the last ROI.
+-   **`s` key**: Save all ROIs and exit.
+-   **`q` key**: Quit without saving.
 
-**Instructions:**
-- Click and drag to draw rectangles
-- Press `D` to mark as door
-- Press `W` to mark as window
-- Press `U` to undo last ROI
-- Press `S` to save and exit
-
-ROIs are saved to `data/rois/{video_name}_rois.json` and auto-loaded during processing.
-
-### Adjusting Detection Thresholds
-
-Edit `intrusion_detection/config.py`:
-
-```python
-# Motion Detection
-MIN_CONTOUR_AREA_PERCENT = 0.015
-DETECTION_PERSISTENCE = 3
-
-# Person Detection (YOLO)
-PERSON_ONLY_MODE = True
-PERSON_CONFIDENCE_THRESHOLD = 0.5
-MIN_PERSON_AREA = 1000
-
-# Damage Detection
-DAMAGE_DIFF_THRESHOLD = 40.0
-DAMAGE_EDGE_SPIKE_RATIO = 0.5
-DAMAGE_FRAGMENT_COUNT_THRESHOLD = 4
-DAMAGE_MIN_PERSISTENCE = 2
-DAMAGE_EVENT_HOLD_FRAMES = 60
-
-# Enhancement
-CLAHE_CLIP_LIMIT = 1.5
-GAMMA = 1.2
-```
-
-### Real-time Threshold Tuning
-
-Use the debug tool to find optimal thresholds:
+### Real-time Damage Tuning
+Fine-tune damage detection parameters with a live preview.
 
 ```bash
 python debug_damage_detection.py input_videos/your_video.mp4
 ```
+Use the trackbars to adjust sensitivity and find the optimal values for your environment.
 
-**Controls:**
-- `SPACE` - Pause/resume
-- `R` - Reset detector
-- `Q` - Quit
-- Adjust trackbars to tune sensitivity in real-time
+### Main Configuration File
+All major parameters can be adjusted in `intrusion_detection/config.py`.
 
 ## 📊 Incident Reports
 
-### Viewing Reports
+### View Reports from the CLI
+Use the `view_incidents.py` script to parse and display reports.
 
 ```bash
-# View latest report
+# View the most recent incident report
 python view_incidents.py
 
 # List all available reports
 python view_incidents.py --list
 
-# View specific report
-python view_incidents.py --file data/incidents/intruder_4_incidents_20251015_012508.json
-
-# Show consolidated summary (multiple videos)
-python view_incidents.py --consolidated
-
-# Include motion event details
-python view_incidents.py --show-motion
+# View a specific report by file path
+python view_incidents.py --file data/incidents/intruder_4_incidents_20251015_012121.json
 ```
 
 ### Report Structure
-
-**Concise JSON format** (91% smaller than frame-by-frame logging):
+The system generates a concise JSON summary for each video.
 
 ```json
 {
-  "summary": {
-    "video_file": "intruder_4.mp4",
-    "total_frames": 1787,
-    "motion_incidents": 163,
-    "damage_incidents": 6
-  },
+  "video_source": "intruder_4.mp4",
+  "processing_timestamp": "2025-10-15T01:21:21",
+  "total_frames_processed": 1787,
   "motion_summary": {
+    "total_intrusion_periods": 1,
     "intrusion_periods": [
       {
-        "start_frame": 385,
-        "end_frame": 449,
-        "duration_frames": 65,
-        "max_persons_detected": 1
+        "period_id": 1,
+        "start_time_seconds": 21.39,
+        "end_time_seconds": 24.94,
+        "duration_seconds": 3.56
       }
     ]
   },
   "damage_incidents": [
     {
-      "frame_number": 1,
+      "timestamp_seconds": 45.12,
       "roi_type": "window",
-      "event_type": "shatter",
-      "score": 66.0
+      "bounding_box": [100, 150, 50, 50]
     }
   ]
 }
 ```
 
-See [INCIDENT_REPORTING.md](INCIDENT_REPORTING.md) for complete documentation.
-
 ## 📁 Project Structure
 
 ```
 facial_detection_system/
-├── intrusion_detection/          # Core package
-│   ├── __init__.py
-│   ├── config.py                 # Configuration & settings
-│   ├── video.py                  # Video capture wrapper
-│   ├── background.py             # Background subtraction
-│   ├── motion.py                 # Motion detection + YOLO
-│   ├── damage.py                 # Damage detection logic
-│   ├── incidents.py              # Incident logging
-│   ├── roi_selector.py           # ROI management
-│   ├── processing.py             # Video processing pipeline
-│   ├── alerts.py                 # Alert system
-│   ├── system.py                 # Batch orchestration
-│   └── interactive.py            # Interactive utilities
-├── run_intrusion_detection.py    # Main CLI runner
-├── select_rois.py                # ROI selection tool
-├── debug_damage_detection.py     # Debug visualization
-├── view_incidents.py             # Report viewer
-├── requirements.txt              # Python dependencies
-├── README.md                     # This file
-├── INCIDENT_REPORTING.md         # Incident docs
-├── input_videos/                 # Input video folder
-├── output_videos/                # Enhanced output videos
-└── data/
-    ├── incidents/                # JSON incident reports
-    └── rois/                     # ROI definitions
+├── intrusion_detection/    # Core Python package for all logic
+├── data/                   # For generated data like reports and ROIs
+│   ├── incidents/
+│   └── rois/
+├── input_videos/           # Place your source videos here
+├── output_videos/          # Annotated videos are saved here
+│
+├── run_intrusion_detection.py  # Main script to run the system
+├── select_rois.py              # Interactive ROI selection tool
+├── debug_damage_detection.py   # Real-time damage tuning tool
+├── view_incidents.py           # CLI tool to view reports
+│
+├── requirements.txt        # Project dependencies
+├── README.md               # This file
+└── LICENSE                 # MIT License
 ```
-
-## 🎯 How It Works
-
-### 1. Motion Detection Pipeline
-```
-Video Frame → Denoise → Background Subtraction → Morphology → Contour Detection
-    ↓
-Person Detection (YOLO) → Filter Motion by Person Overlap → Draw Bounding Boxes
-```
-
-### 2. Damage Detection Pipeline
-```
-ROI Extraction → Baseline Comparison → Edge Detection → Feature Analysis
-    ↓
-Door: High Diff + Edge Spike → Forced Entry
-Window: Fragment Count + Edge Spike → Shatter
-    ↓
-Persistence Check → Event Trigger → Persistent Highlighting
-```
-
-### 3. Incident Logging
-```
-Motion Events → Group into Periods → Compact Summary
-Damage Events → Full Details → JSON Report
-    ↓
-Statistics + Configuration → Final Report
-```
-
-## 🛠️ Troubleshooting
-
-### Common Issues
-
-**1. No output videos generated**
-- Check `motion_detection_system.log` for errors
-- Ensure videos exist in `input_videos/`
-- Verify video codec compatibility
-
-**2. YOLO model not found**
-```bash
-# First run will auto-download yolov8n.pt
-# Or disable YOLO: --disable-yolo flag
-```
-
-**3. Low detection accuracy**
-- Use debug tool to tune thresholds
-- Adjust `DAMAGE_DIFF_THRESHOLD`, `DAMAGE_EDGE_SPIKE_RATIO`
-- Check ROI placement with `select_rois.py`
-
-**4. False positives**
-- Increase `DAMAGE_MIN_PERSISTENCE` (require more consecutive frames)
-- Raise `PERSON_CONFIDENCE_THRESHOLD`
-- Enable `PERSON_ONLY_MODE`
-
-**5. Performance issues**
-- Reduce `FRAME_WIDTH` / `FRAME_HEIGHT` in config
-- Adjust `PROCESS_EVERY_N_FRAMES` to skip frames
-- Use `--max-frames` for testing
-
-## 📈 Performance
-
-- **Processing Speed**: ~10-15 FPS on typical hardware (640x480)
-- **Memory Usage**: ~500MB-1GB depending on video length
-- **Report Size**: ~5KB per video (concise format)
-- **Accuracy**: 90%+ detection rate with proper threshold tuning
 
 ## 🤝 Contributing
-
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
-### Development Setup
-
-```bash
-# Clone and setup
-git clone <repo-url>
-cd facial_detection_system
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-
-# Run tests (if available)
-pytest tests/
-
-# Code style
-black intrusion_detection/
-flake8 intrusion_detection/
-```
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://github.com/KumarSatyam24/AI-Based-Real-Time-Intruder-Detection-System-Using-Face-Recognition-and-Telegram-Alerts/issues).
 
 ## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **OpenCV** - Computer vision library
-- **Ultralytics YOLO** - Object detection
-- **imageio** - Cross-platform video I/O
-
-## 📧 Contact
-
-- **Author**: Satyam Kumar
-- **Repository**: [GitHub](https://github.com/KumarSatyam24/AI-Based-Real-Time-Intruder-Detection-System-Using-Face-Recognition-and-Telegram-Alerts)
-
-## 🔮 Future Enhancements
-
-- [ ] Real-time streaming support
-- [ ] Telegram/Email alert integration
-- [ ] Web dashboard for monitoring
-- [ ] Deep learning-based damage classification
-- [ ] Multi-camera support
-- [ ] Cloud storage integration
-- [ ] Mobile app
-- [ ] Sound detection integration
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
-
-**⭐ If you find this project useful, please give it a star!**
+⭐ *If you find this project useful, please consider giving it a star!*
