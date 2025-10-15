@@ -1,4 +1,15 @@
-# Technical Documentation: Advanced Intrusion Detection System (In-Depth)
+# Technical Documentation: Advanced Intrusion Detection Sys1) **Mean absoEvent logic:
+- **Forced Entry (door)**: $D_t \ge \texttt{DAMAGE\_DIFF\_THRESHOLD}$ and edge spike.
+- **Shatter (window)**: $F_t \ge \texttt{DAMAGE\_FRAGMENT\_COUNT\_THRESHOLD}$ and edge spike## 6) Performance and Complexity
+
+- **Per-frame cost**: background subtraction $\mathcal{O}(HW)$; morphology and contour detection $\approx \mathcal{O}(HW)$.
+- **YOLOv8 cost** depends on resolution/model; `yolov8n` balances speed and accuracy.ifference to baseline (intensity change)**:
+
+$D_t = \frac{1}{|\Omega|}\sum_{(x,y)\in\Omega} |I_t(x,y) - B(x,y)|$
+
+2) **Edge spike ratio**: apply Canny to current ROI; let $E_t$ be edge pixel count and $\overline{E}$ an EMA of edge counts. An edge spike holds if $E_t/(\overline{E} + \epsilon) \ge \texttt{DAMAGE\_EDGE\_SPIKE\_RATIO}$.
+
+3) **Fragmentation**: number of small contours (area in [5, 150]) in the edge map (proxy for shards/splinters): $F_t$.-Depth)
 
 This document provides an in-depth, engineering-focused description of the system’s architecture, algorithms, module APIs, configuration surface, data formats, performance characteristics, and extension points. It reflects the current implementation under `intrusion_detection/` and associated CLI tools.
 
@@ -36,16 +47,16 @@ Core modules and roles:
 Background subtraction uses OpenCV’s KNN subtractor to produce a binary foreground mask $M_t$ from a frame $I_t$. Mask refinement uses morphology (open/close + dilation). Contours with area below a threshold are discarded.
 
 - Minimum motion area criterion:
-  $A(C) > \rho_{area}·(H·W)$ where $\rho_{area} = \texttt{Config.MIN_CONTOUR_AREA_PERCENT}$.
+  $A(C) > \rho_{\text{area}} \cdot (H \cdot W)$ where $\rho_{\text{area}} = \texttt{Config.MIN\_CONTOUR\_AREA\_PERCENT}$.
 
 If person detection is enabled, YOLOv8 runs on (optionally enhanced) frames. Person boxes are filtered by:
-- Confidence: $c \ge \texttt{PERSON_CONFIDENCE_THRESHOLD}$
-- Area bounds: $\texttt{MIN_PERSON_AREA} \le w·h \le \texttt{MAX_PERSON_AREA}$
-- Aspect ratio: $\texttt{PERSON_ASPECT_RATIO_MIN} \le w/h \le \texttt{PERSON_ASPECT_RATIO_MAX}$
+- Confidence: $c \ge \texttt{PERSON\_CONFIDENCE\_THRESHOLD}$
+- Area bounds: $\texttt{MIN\_PERSON\_AREA} \le w \cdot h \le \texttt{MAX\_PERSON\_AREA}$
+- Aspect ratio: $\texttt{PERSON\_ASPECT\_RATIO\_MIN} \le w/h \le \texttt{PERSON\_ASPECT\_RATIO\_MAX}$
 
 A motion contour is kept iff its IoU with any person box is at least `MIN_OVERLAP_RATIO`:
 
-$\mathrm{IoU}(B_m, B_p) = \frac{|B_m \cap B_p|}{|B_m \cup B_p|} \ge \tau_{iou}$
+$\mathrm{IoU}(B_m, B_p) = \frac{|B_m \cap B_p|}{|B_m \cup B_p|} \ge \tau_{\text{iou}}$
 
 If `PERSON_ONLY_MODE=True` and no person is detected, all motion is suppressed. As a fallback, if YOLO detects persons but overlap is low, synthetic contours are generated from person boxes to preserve tracking.
 
