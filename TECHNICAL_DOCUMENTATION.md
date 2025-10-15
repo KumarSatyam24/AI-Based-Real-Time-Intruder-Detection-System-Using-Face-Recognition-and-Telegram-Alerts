@@ -1,4 +1,22 @@
-# Technical Documentation: Advanced Intrusion Detection Sys1) **Mean absoEvent logic:
+# Technical Documentation: Advanced Intrusion Background subtraction Per ROI, the detectEvent logic:
+- **Forced Entry (door)**: Mean difference >= `DAMAGE_DIFF_THRESHOLD` AND edge spike detected.
+- **Shatter (window)**: Fragment count >= `DAMAGE_FRAGMENT_COUNT_THRESHOLD` AND edg## 6) Performance and Complexity
+
+- **Per-frame cost**: Background subtraction and morphology operations scale linearly with frame size (width × height).
+- **YOLOv8 cost** depends on resolution/model; `yolov8n` balances speed and accuracy.
+- **Throughput can be tuned via**:ke detected.keeps a grayscale baseline and an exponential average of edge activity. For each frame, three signals are computed:
+
+1) **Mean absolute difference to baseline (intensity change)**:
+   Calculate the average pixel difference between current frame and baseline image within the ROI.
+
+2) **Edge spike ratio**: 
+   Apply Canny edge detection to the current ROI. Count edge pixels and compare to the exponential moving average of recent edge counts. An edge spike occurs when the current count divided by the average exceeds `DAMAGE_EDGE_SPIKE_RATIO`.
+
+3) **Fragmentation**: 
+   Count small contours (area between 5-150 pixels) in the edge map as a proxy for shards or splinters.CV's KNN subtractor to produce a binary foreground mask from each frame. Mask refinement uses morphology (open/close + dilation). Contours with area below a threshold are discarded.
+
+- Minimum motion area criterion:
+  Contour area must be greater than `MIN_CONTOUR_AREA_PERCENT * frame_width * frame_height`.ction Sys1) **Mean absoEvent logic:
 - **Forced Entry (door)**: $D_t \ge \texttt{DAMAGE\_DIFF\_THRESHOLD}$ and edge spike.
 - **Shatter (window)**: $F_t \ge \texttt{DAMAGE\_FRAGMENT\_COUNT\_THRESHOLD}$ and edge spike## 6) Performance and Complexity
 
@@ -50,13 +68,11 @@ Background subtraction uses OpenCV’s KNN subtractor to produce a binary foregr
   $A(C) > \rho_{\text{area}} \cdot (H \cdot W)$ where $\rho_{\text{area}} = \texttt{Config.MIN\_CONTOUR\_AREA\_PERCENT}$.
 
 If person detection is enabled, YOLOv8 runs on (optionally enhanced) frames. Person boxes are filtered by:
-- Confidence: $c \ge \texttt{PERSON\_CONFIDENCE\_THRESHOLD}$
-- Area bounds: $\texttt{MIN\_PERSON\_AREA} \le w \cdot h \le \texttt{MAX\_PERSON\_AREA}$
-- Aspect ratio: $\texttt{PERSON\_ASPECT\_RATIO\_MIN} \le w/h \le \texttt{PERSON\_ASPECT\_RATIO\_MAX}$
+- Confidence: must be >= `PERSON_CONFIDENCE_THRESHOLD`
+- Area bounds: bounding box area must be between `MIN_PERSON_AREA` and `MAX_PERSON_AREA`
+- Aspect ratio: width/height ratio must be between `PERSON_ASPECT_RATIO_MIN` and `PERSON_ASPECT_RATIO_MAX`
 
-A motion contour is kept iff its IoU with any person box is at least `MIN_OVERLAP_RATIO`:
-
-$\mathrm{IoU}(B_m, B_p) = \frac{|B_m \cap B_p|}{|B_m \cup B_p|} \ge \tau_{\text{iou}}$
+A motion contour is kept if its Intersection over Union (IoU) with any person box is at least `MIN_OVERLAP_RATIO`. IoU is calculated as the intersection area divided by the union area of the two bounding boxes.
 
 If `PERSON_ONLY_MODE=True` and no person is detected, all motion is suppressed. As a fallback, if YOLO detects persons but overlap is low, synthetic contours are generated from person boxes to preserve tracking.
 
