@@ -76,6 +76,19 @@ class Config:
     # Alert Settings
     ALERT_COOLDOWN = 30
 
+    # Telegram Notification Settings
+    TELEGRAM_ENABLED = True  # Set to True to enable Telegram notifications
+    TELEGRAM_BOT_TOKEN = '' # Your bot token from BotFather
+    TELEGRAM_CHAT_ID = ''  # Your chat ID (can be user ID or group chat ID)
+    TELEGRAM_NOTIFICATION_COOLDOWN = 30  # Minimum seconds between notifications
+    TELEGRAM_MAX_NOTIFICATIONS_PER_HOUR = 20  # Rate limit (0 = unlimited)
+    TELEGRAM_SEND_IMAGES = True  # Attach frame images to notifications
+    TELEGRAM_SEND_STARTUP_MESSAGE = True  # Send notification when system starts
+    TELEGRAM_SEND_SHUTDOWN_MESSAGE = True  # Send notification when system stops
+    TELEGRAM_NOTIFY_ON_MOTION = True  # Send notifications for motion detection
+    TELEGRAM_NOTIFY_ON_DAMAGE = True  # Send notifications for damage detection
+    TELEGRAM_NOTIFY_ON_SESSION_END = True  # Send summary after video processing
+
     # Logging Settings
     LOG_FILE = 'motion_detection_log.csv'
     LOG_LEVEL = logging.INFO

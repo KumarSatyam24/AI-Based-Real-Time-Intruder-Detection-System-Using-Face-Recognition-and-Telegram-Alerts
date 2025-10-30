@@ -22,7 +22,8 @@
 - ✅ **Motion Detection**: High-performance background subtraction (KNN) with morphological filtering to detect movement in restricted zones.
 - 👤 **Person Tracking**: Integrates YOLOv8 to specifically identify and track humans, significantly reducing false positives from other movements.
 - 🚪 **Damage Detection**: A multi-heuristic algorithm to detect signs of forced entry, such as window shattering or door impacts, by analyzing frame differences, edge spikes, and fragmentation.
-- 📊 **Concise Incident Reporting**: Automatically generates detailed JSON reports that summarize events into "intrusion periods," reducing log size by over 90% compared to frame-by-frame logging.
+- � **Telegram Notifications**: Real-time mobile alerts with frame images sent directly to your phone when motion, persons, or damage is detected. *(NEW!)*
+- �📊 **Concise Incident Reporting**: Automatically generates detailed JSON reports that summarize events into "intrusion periods," reducing log size by over 90% compared to frame-by-frame logging.
 - 🎯 **Interactive ROI Management**: Easy-to-use tool to draw and define specific Regions of Interest (e.g., doors, windows) for targeted monitoring.
 - 🔧 **Real-time Debugging**: Includes a debug tool with interactive trackbars to fine-tune damage detection sensitivity live on a video stream.
 - 📹 **Batch Processing**: Capable of processing multiple video files in a single run, generating individual reports for each.
@@ -64,7 +65,17 @@
 ### 1. Place Videos
 Put your video files (`.mp4`, `.avi`, etc.) into the `input_videos/` directory.
 
-### 2. Run Detection
+### 2. (Optional) Setup Telegram Notifications
+Get real-time alerts on your phone! See **[Telegram Setup Guide](TELEGRAM_README.md)** for 5-minute setup.
+
+```bash
+# Quick setup:
+pip install python-telegram-bot pillow
+# Configure in config.py, then test:
+python test_telegram_connection.py
+```
+
+### 3. Run Detection
 Execute the main script from the root directory.
 
 ```bash
@@ -78,9 +89,10 @@ python run_intrusion_detection.py --select intruder_1.mp4,intruder_2.mp4
 python run_intrusion_detection.py --select
 ```
 
-### 3. View Results
+### 4. View Results
 -   **Annotated Videos**: Find the processed videos with bounding boxes in the `output_videos/` folder.
 -   **Incident Reports**: Detailed JSON reports are saved in `data/incidents/`.
+-   **Telegram Alerts**: Receive instant mobile notifications (if enabled).
 
 ## 🔧 Configuration & Tools
 

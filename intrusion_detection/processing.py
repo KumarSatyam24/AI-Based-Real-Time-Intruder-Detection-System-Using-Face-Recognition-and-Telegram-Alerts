@@ -14,6 +14,8 @@ from .motion import MotionDetector
 from .damage import DamageDetector
 from .roi_selector import load_rois_from_file
 from .incidents import IncidentRecorder, generate_summary_report
+from .alerts import SimpleAlertSystem
+import time
 
 
 def create_full_enhanced_video_with_imageio(
@@ -21,6 +23,7 @@ def create_full_enhanced_video_with_imageio(
     cfg: Config,
     person_detector=None,
     max_frames: Optional[int] = None,
+    alert_system: Optional[SimpleAlertSystem] = None,
 ) -> Optional[str]:
     logger = get_logger()
     cap = VideoCapture(input_video_path)
@@ -38,6 +41,10 @@ def create_full_enhanced_video_with_imageio(
 
     # Initialize incident recorder
     incident_recorder = IncidentRecorder(cfg, input_video_path) if cfg.ENABLE_INCIDENT_LOGGING else None
+    
+    # Use provided alert system or create new one
+    if alert_system is None:
+        alert_system = SimpleAlertSystem(cfg)
 
     fps = cap.get_fps() or 30.0
     subtractor = BackgroundSubtractor(cfg, method='KNN')
@@ -47,6 +54,7 @@ def create_full_enhanced_video_with_imageio(
     output_path = Config.get_output_video_path(input_video_path, suffix='enhanced')
     writer = imageio.get_writer(output_path, fps=fps)
     frame_count = 0
+    start_time = time.time()
 
     try:
         while True:
@@ -61,7 +69,7 @@ def create_full_enhanced_video_with_imageio(
             motion_detected, contours, bbox, person_boxes = detector.detect(frame, fg_mask)
             
             # Log motion/intrusion events
-            if incident_recorder and motion_detected:
+            if motion_detected:
                 event_type = 'person_detected' if person_boxes else 'motion_detected'
                 person_count = len(person_boxes) if person_boxes else 0
                 # Handle Box objects properly
@@ -73,21 +81,46 @@ def create_full_enhanced_video_with_imageio(
                         else:
                             # Fallback for tuple format
                             bboxes.append([int(box[0]), int(box[1]), int(box[2]), int(box[3])])
-                incident_recorder.log_motion_event(
-                    frame_number=frame_count,
-                    event_type=event_type,
-                    person_count=person_count,
-                    bounding_boxes=bboxes
-                )
+                
+                # Log to incident recorder
+                if incident_recorder:
+                    incident_recorder.log_motion_event(
+                        frame_number=frame_count,
+                        event_type=event_type,
+                        person_count=person_count,
+                        bounding_boxes=bboxes
+                    )
+                
+                # Send Telegram alert if enabled
+                if cfg.TELEGRAM_NOTIFY_ON_MOTION:
+                    alert_system.notify_motion_detected(
+                        frame_number=frame_count,
+                        person_count=person_count,
+                        bounding_boxes=bboxes,
+                        frame_image=drawn if cfg.TELEGRAM_SEND_IMAGES else None
+                    )
             
             drawn = MotionDetector.draw_motion(frame, contours, bbox, person_boxes)
             
             if damage_detector is not None:
                 events = damage_detector.process_frame(frame)
-                # Log damage events
-                if incident_recorder and events:
+                # Log damage events and send alerts
+                if events:
                     for event in events:
-                        incident_recorder.log_damage_event(frame_count, event)
+                        # Log to incident recorder
+                        if incident_recorder:
+                            incident_recorder.log_damage_event(frame_count, event)
+                        
+                        # Send Telegram alert if enabled
+                        if cfg.TELEGRAM_NOTIFY_ON_DAMAGE:
+                            alert_system.notify_damage_detected(
+                                frame_number=frame_count,
+                                roi_type=event.roi_type,
+                                roi_index=event.roi_index,
+                                event_type=event.event_type,
+                                score=event.score,
+                                frame_image=drawn if cfg.TELEGRAM_SEND_IMAGES else None
+                            )
                 # Always annotate with recent events for persistent highlight
                 drawn = damage_detector.annotate(drawn, events, cfg, getattr(damage_detector, 'recent_events', None))
             
@@ -105,12 +138,29 @@ def create_full_enhanced_video_with_imageio(
 
     # Finalize incident report
     incident_log_path = None
+    motion_count = 0
+    damage_count = 0
+    
     if incident_recorder:
         incident_log_path = incident_recorder.finalize(output_path, frame_count)
+        motion_count = len(incident_recorder.motion_incidents)
+        damage_count = len(incident_recorder.damage_incidents)
 
+    processing_duration = time.time() - start_time
+    
     logger.info("Saved enhanced video: %s (%d frames)", output_path, frame_count)
     if incident_log_path:
         logger.info("Incident log: %s", incident_log_path)
+    
+    # Send session summary via Telegram if enabled
+    if cfg.TELEGRAM_NOTIFY_ON_SESSION_END:
+        alert_system.notify_session_summary(
+            video_file=os.path.basename(input_video_path),
+            total_frames=frame_count,
+            motion_incidents=motion_count,
+            damage_incidents=damage_count,
+            processing_duration=processing_duration
+        )
     
     return output_path
 
@@ -120,6 +170,7 @@ def process_all_input_videos(
     person_detector=None,
     selection: Optional[List[str]] = None,
     max_frames_per_video: Optional[int] = None,
+    alert_system: Optional[SimpleAlertSystem] = None,
 ) -> List[str]:
     logger = get_logger()
     videos = []
@@ -131,11 +182,20 @@ def process_all_input_videos(
         sel_set = {os.path.basename(p).lower() for p in selection}
         videos = [v for v in videos if os.path.basename(v).lower() in sel_set]
 
+    # Create shared alert system for all videos
+    if alert_system is None:
+        alert_system = SimpleAlertSystem(cfg)
+
     outputs: List[str] = []
     incident_logs: List[str] = []
     
     for v in sorted(videos):
-        out = create_full_enhanced_video_with_imageio(v, cfg, person_detector=person_detector, max_frames=max_frames_per_video)
+        out = create_full_enhanced_video_with_imageio(
+            v, cfg, 
+            person_detector=person_detector, 
+            max_frames=max_frames_per_video,
+            alert_system=alert_system
+        )
         if out:
             outputs.append(out)
             # Track incident log files
@@ -157,5 +217,9 @@ def process_all_input_videos(
         summary_path = generate_summary_report(cfg, incident_logs)
         if summary_path:
             logger.info("Consolidated summary: %s", summary_path)
+    
+    # Shutdown alert system (sends shutdown notification if enabled)
+    if alert_system:
+        alert_system.shutdown()
     
     return outputs

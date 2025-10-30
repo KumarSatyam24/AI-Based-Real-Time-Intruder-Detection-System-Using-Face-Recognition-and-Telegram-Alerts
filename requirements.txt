@@ -7,6 +7,10 @@ imageio-ffmpeg>=0.4.0
 # Object detection
 ultralytics>=8.0.0
 
+# Telegram notifications (optional but recommended)
+python-telegram-bot>=20.0
+pillow>=9.0.0
+
 # Optional development tools (uncomment if needed)
 # pytest>=7.0.0
 # pytest-cov>=4.0.0
