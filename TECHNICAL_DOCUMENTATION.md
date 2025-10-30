@@ -25,7 +25,7 @@
 
 $D_t = \frac{1}{|\Omega|}\sum_{(x,y)\in\Omega} |I_t(x,y) - B(x,y)|$
 
-2) **Edge spike ratio**: apply Canny to current ROI; let $E_t$ be edge pixel count and $\overline{E}$ an EMA of edge counts. An edge spike holds if $E_t/(\overline{E} + \epsilon) \ge \texttt{DAMAGE\_EDGE\_SPIKE\_RATIO}$.
+2) **Edge spike ratio**: apply Canny to current ROI; let $E_t$ be edge pixel count and $\overline{E}$ an EMA of edge counts. An edge spike holds if $E_t/(\bar E + \epsilon) \ge \texttt{DAMAGE\_EDGE\_SPIKE\_RATIO}$.
 
 3) **Fragmentation**: number of small contours (area in [5, 150]) in the edge map (proxy for shards/splinters): $F_t$.-Depth)
 
